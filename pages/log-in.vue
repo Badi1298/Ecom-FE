@@ -35,6 +35,7 @@ import { useRouter } from 'vue-router';
 import { AuthService } from '@/service/default/index.js';
 
 import Cookies from 'js-cookie';
+import axios from 'axios';
 
 const authService = new AuthService();
 
@@ -48,18 +49,38 @@ const email = ref('');
 const password = ref('');
 
 const loginUser = async () => {
-    const payload = {
-        email: email.value,
-        password: password.value,
+    const graphqlQuery = {
+        query: `
+            query Login($email: String!, $password: String!) {
+                login(email: $email, password: $password) {
+                    token
+                    userId
+                }
+            }
+        `,
+        variables: {
+            email: email.value,
+            password: password.value,
+        },
     };
 
     try {
-        const response = await authService.login(payload);
-        Cookies.set('token', response.data.token);
+        const response = await axios.post(
+            'http://localhost:8080/graphql',
+            graphqlQuery
+        );
+        console.log(response);
+        Cookies.set('token', response.data.data.login.token);
         isLoggedIn.value = true;
 
-        getUserData();
+        // getUserData();
         router.push('/home');
+        if (response.data.errors) {
+            console.log(response.data.errors);
+        } else {
+            console.log(response.data.data);
+            router.push('/home');
+        }
     } catch (err) {
         console.log(err);
     }

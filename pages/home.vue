@@ -47,8 +47,6 @@
 </template>
 
 <script setup>
-import openSocket from 'socket.io-client';
-
 import { ItemsService } from '@/service/default/index.js';
 
 const itemsService = new ItemsService();
@@ -70,15 +68,6 @@ const showNextPageButton = computed(() => {
 
 onMounted(() => {
     getItems();
-    // const socket = openSocket('http://localhost:8080');
-    // socket.on('items', data => {
-    //     if (data.action === 'create') {
-    //         items.value.push(data.item);
-    //     } else if (data.action === 'update') {
-    //         console.log('update', data.item);
-    //         replaceObjectById(items.value, data.item._id, data.item);
-    //     }
-    // });
 });
 
 const getItems = async () => {
@@ -88,17 +77,6 @@ const getItems = async () => {
         totalItems.value = response.data.totalItems;
     } catch (err) {
         console.log(err);
-    }
-};
-
-const replaceObjectById = (arr, id, newData) => {
-    // Find the index of the object with the specified id
-    let index = arr.findIndex(item => item._id === id);
-
-    // If the object with the specified id exists
-    if (index !== -1) {
-        // Replace the object with new data
-        arr[index] = newData;
     }
 };
 

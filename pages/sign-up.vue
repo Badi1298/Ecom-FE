@@ -32,16 +32,6 @@
                     class="border border-black rounded ring-0 outline-none px-1"
                 />
             </div>
-            <div class="flex flex-col gap-y-1">
-                <label for="confirm-password">Confirm Password</label>
-                <input
-                    v-model="confirmPassword"
-                    id="confirm-password"
-                    name="confirm-password"
-                    type="password"
-                    class="border border-black rounded ring-0 outline-none px-1"
-                />
-            </div>
             <button class="bg-green text-white px-2 py-1 rounded mt-3">
                 Signup
             </button>
@@ -59,19 +49,37 @@ const router = useRouter();
 const name = ref('');
 const email = ref('');
 const password = ref('');
-const confirmPassword = ref('');
 
 const signupUser = async () => {
-    const payload = {
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        confirmPassword: confirmPassword.value,
+    const graphqlQuery = {
+        query: `
+            mutation CreateUser($userInput: UserInputData!) {
+                createUser(userInput: $userInput) {
+                    name
+                    email
+                }
+            }
+        `,
+        variables: {
+            userInput: {
+                email: email.value,
+                name: name.value,
+                password: password.value,
+            },
+        },
     };
 
     try {
-        await axios.put('http://localhost:8080/auth/signup', payload);
-        router.push('/home');
+        const response = await axios.post(
+            'http://localhost:8080/graphql',
+            graphqlQuery
+        );
+        if (response.data.errors) {
+            console.log(response.data.errors);
+        } else {
+            console.log(response.data.data);
+            router.push('/home');
+        }
     } catch (err) {
         console.log(err);
     }
